@@ -38,19 +38,26 @@ public class SciWordRandomizer {
 	
 	public static void main (String args[]) throws IOException {
 		//Initialization
-		resetVar();
+		
 		if (args.length != 1) {
 			String errStr = "Usage:\tjava SciWordRandomizer <filename>";
 			System.err.println(errStr);
 			System.exit(1);
 		}
 		BufferedReader input = null;
+		timer = new Timer(1, new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				calender.add(GregorianCalendar.MILLISECOND, 1);
+			}
+		});
 		try {
 			input = new BufferedReader(new FileReader(args[0]));
 		} catch (FileNotFoundException e) {
 			System.err.printf("File %s not found.", args[0]);
 			System.exit(2);
 		}
+		resetVar();
 		
 		//Read in data
 		words = new ArrayList<String>();
@@ -67,8 +74,9 @@ public class SciWordRandomizer {
 		final JFrame frame = new JFrame("Science Word Randomizer");
 		JPanel panel = new JPanel();
 		JPanel displayPanel = new JPanel();
-		JPanel buttonPanel = new JPanel();
+		JPanel countPanel = new JPanel();
 		JPanel timerPanel = new JPanel();
+		JPanel buttonPanel = new JPanel();
 		
 		panel.setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
@@ -78,20 +86,25 @@ public class SciWordRandomizer {
 		panel.add(displayPanel, c);
 		c.weighty = 1;
 		c.gridy = 1;
+		panel.add(countPanel, c);
+		c.weighty = 1;
+		c.gridy = 2;
 		panel.add(timerPanel, c);
 		c.weighty = 0;
-		c.gridy = 2;
+		c.gridy = 3;
 		panel.add(buttonPanel, c);
 			
 		final JLabel label = new JLabel(nextRandomWord(), SwingConstants.CENTER);
 		label.setFont(new Font("Times New Roman", Font.PLAIN, 40));
 		final JLabel count = new JLabel("0/0");
+		count.setFont(new Font("Ariel", Font.PLAIN, 15));
 		final JLabel dummy = new JLabel("\n\nCorrect/Skipped:");
+		dummy.setFont(new Font("Ariel", Font.PLAIN, 15));
 		
 		//Timer
 		final JLabel timerLabel = new JLabel();
+		timerLabel.setFont(new Font("Courier New", Font.PLAIN, 25));
 		timerPanel.add(timerLabel);
-		timerLabel.setText("" + calender.get(GregorianCalendar.SECOND));
 		
 		//Buttons
 		final JButton next = new JButton("Next");
@@ -139,12 +152,12 @@ public class SciWordRandomizer {
 		c.weighty = 1;
 		c.gridy = 0;
 		displayPanel.add(label, c);
-		c.weighty = 1;
-		c.gridy = 1;
-		displayPanel.add(dummy, c);
 		c.weighty = 0;
-		c.gridy = 2;
-		displayPanel.add(count, c);
+		c.gridy = 0;
+		countPanel.add(dummy, c);
+		c.weighty = 0;
+		c.gridy = 1;
+		countPanel.add(count, c);
 		buttonPanel.add(next);
 		buttonPanel.add(skip);
 		buttonPanel.add(restart);
@@ -159,19 +172,24 @@ public class SciWordRandomizer {
 		
 		while (true) {
 			System.out.println(numCorrect + numSkipped);
-			timerLabel.setText("Time: " + calender.get(GregorianCalendar.SECOND));
-			timerPanel.repaint();
+			timerLabel.setText(String.format("%01d:%02d:%02d:%03d",
+					calender.get(GregorianCalendar.HOUR),
+					calender.get(GregorianCalendar.MINUTE),
+					calender.get(GregorianCalendar.SECOND),
+					calender.get(GregorianCalendar.MILLISECOND)));
 			if (usedIndex.size() >= words.size()) {
 				label.setText("No more words in list.");
 				label.setForeground(Color.RED);
 				next.setEnabled(false);
 				skip.setEnabled(false);
+				timer.stop();
 			}
 			if (numCorrect + numSkipped >= WORD_CAP) {
 				label.setText(String.format("%d Words All Done!", WORD_CAP));
 				label.setForeground(Color.RED);
 				next.setEnabled(false);
 				skip.setEnabled(false);
+				timer.stop();
 			}
 		}
 	}
@@ -191,13 +209,6 @@ public class SciWordRandomizer {
 		numCorrect = numSkipped = 0;
 		calender = new GregorianCalendar();
 		calender.clear();
-		timer = new Timer(1, new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				calender.add(GregorianCalendar.MILLISECOND, 1);
-			}
-		});
 		timer.restart();
 	}
 }

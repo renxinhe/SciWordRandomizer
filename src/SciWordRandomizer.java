@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Random;
 
@@ -17,6 +18,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
 
 /** A randomizer that displays words from a file. To be used for Science Word practices.
  * 
@@ -25,10 +27,13 @@ import javax.swing.SwingConstants;
  */
 
 public class SciWordRandomizer {
-	static ArrayList<String> words;
-	static HashSet<Integer> usedIndex;
 	static int numCorrect;
 	static int numSkipped;
+	static ArrayList<String> words;
+	static GregorianCalendar calender;
+	static HashSet<Integer> usedIndex;
+	static Timer timer;
+	
 	static final int WORD_CAP = 70;
 	
 	public static void main (String args[]) throws IOException {
@@ -63,14 +68,19 @@ public class SciWordRandomizer {
 		JPanel panel = new JPanel();
 		JPanel displayPanel = new JPanel();
 		JPanel buttonPanel = new JPanel();
+		JPanel timerPanel = new JPanel();
+		
 		panel.setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		displayPanel.setLayout(new GridBagLayout());
-		c.weighty = 1;
+		c.weighty = 2;
 		c.gridy = 0;
 		panel.add(displayPanel, c);
-		c.weighty = 0;
+		c.weighty = 1;
 		c.gridy = 1;
+		panel.add(timerPanel, c);
+		c.weighty = 0;
+		c.gridy = 2;
 		panel.add(buttonPanel, c);
 			
 		final JLabel label = new JLabel(nextRandomWord(), SwingConstants.CENTER);
@@ -78,6 +88,12 @@ public class SciWordRandomizer {
 		final JLabel count = new JLabel("0/0");
 		final JLabel dummy = new JLabel("\n\nCorrect/Skipped:");
 		
+		//Timer
+		final JLabel timerLabel = new JLabel();
+		timerPanel.add(timerLabel);
+		timerLabel.setText("" + calender.get(GregorianCalendar.SECOND));
+		
+		//Buttons
 		final JButton next = new JButton("Next");
 		next.addActionListener(new ActionListener() {
 			
@@ -143,6 +159,7 @@ public class SciWordRandomizer {
 		
 		while (true) {
 			System.out.println(numCorrect + numSkipped);
+			timerLabel.setText("Time: " + calender.get(GregorianCalendar.SECOND));
 			if (numCorrect + numSkipped >= WORD_CAP) {
 				label.setText(String.format("%d Words All Done!", WORD_CAP));
 				label.setForeground(Color.RED);
@@ -165,6 +182,14 @@ public class SciWordRandomizer {
 	public static void resetVar() {
 		usedIndex = new HashSet<Integer>();
 		numCorrect = numSkipped = 0;
+		timer = new Timer(1000, new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				calender.add(GregorianCalendar.SECOND, 1);
+			}
+		});
+		calender = new GregorianCalendar();
 	}
 }
 

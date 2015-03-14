@@ -160,6 +160,13 @@ public class SciWordRandomizer {
 		while (true) {
 			System.out.println(numCorrect + numSkipped);
 			timerLabel.setText("Time: " + calender.get(GregorianCalendar.SECOND));
+			timerPanel.repaint();
+			if (usedIndex.size() >= words.size()) {
+				label.setText("No more words in list.");
+				label.setForeground(Color.RED);
+				next.setEnabled(false);
+				skip.setEnabled(false);
+			}
 			if (numCorrect + numSkipped >= WORD_CAP) {
 				label.setText(String.format("%d Words All Done!", WORD_CAP));
 				label.setForeground(Color.RED);
@@ -182,14 +189,16 @@ public class SciWordRandomizer {
 	public static void resetVar() {
 		usedIndex = new HashSet<Integer>();
 		numCorrect = numSkipped = 0;
-		timer = new Timer(1000, new ActionListener() {
+		calender = new GregorianCalendar();
+		calender.clear();
+		timer = new Timer(1, new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				calender.add(GregorianCalendar.SECOND, 1);
+				calender.add(GregorianCalendar.MILLISECOND, 1);
 			}
 		});
-		calender = new GregorianCalendar();
+		timer.restart();
 	}
 }
 
